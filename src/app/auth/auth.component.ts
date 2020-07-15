@@ -1,19 +1,36 @@
-import {Component} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {NgForm} from '@angular/forms';
-import {AuthResponseData, AuthService} from './auth.service';
-import {Observable} from 'rxjs';
-import {Router} from '@angular/router';
+import {Store} from '@ngrx/store';
+import * as fromApp from '../store/app.reducer';
+import * as AuthActions from './store/auth.actions';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-auth',
   templateUrl: './auth.component.html'
 })
-export class AuthComponent {
+export class AuthComponent implements OnInit, OnDestroy {
   isLoginMode = true;
   isLoading = false;
   error: string = null;
 
-  constructor(private authService: AuthService, private router: Router) {
+  private storeSub: Subscription;
+
+  constructor(private store: Store<fromApp.AppState>) {
+  }
+
+  ngOnInit(): void {
+    this.storeSub = this.store.select('auth').subscribe(authState => {
+      this.isLoading = authState.loading;
+      this.error = authState.authError;
+      if (this.error) {
+        console.log(this.error);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.storeSub.unsubscribe();
   }
 
   onSwitchMode() {
@@ -25,28 +42,14 @@ export class AuthComponent {
       return;
     }
 
-    this.isLoading = true;
-
     const email = authForm.value.email;
     const password = authForm.value.pass;
 
-    let authObservable: Observable<AuthResponseData>;
-
     if (this.isLoginMode) {
-      authObservable = this.authService.login(email, password);
+      this.store.dispatch(new AuthActions.LoginStart({email, password}));
     } else {
-      authObservable = this.authService.signUp(email, password);
+      this.store.dispatch(new AuthActions.SignUp({email, password}));
     }
-
-    authObservable.subscribe(response => {
-      console.log(response);
-      this.isLoading = false;
-      this.router.navigate(['/recipes']);
-    }, errorMessage => {
-      console.log(errorMessage);
-      this.error = errorMessage;
-      this.isLoading = false;
-    });
 
     authForm.reset();
   }

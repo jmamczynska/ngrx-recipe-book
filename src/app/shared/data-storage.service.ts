@@ -3,7 +3,6 @@ import {HttpClient} from '@angular/common/http';
 import {RecipeService} from '../recipes/recipe.service';
 import {Recipe} from '../recipes/recipe.model';
 import {map, tap} from 'rxjs/operators';
-import {AuthService} from '../auth/auth.service';
 import {Observable} from 'rxjs';
 
 @Injectable()
@@ -13,8 +12,7 @@ export class DataStorageService {
 
   constructor(
       private httpClient: HttpClient,
-      private recipeService: RecipeService,
-      private authService: AuthService) {
+      private recipeService: RecipeService) {
   }
 
   storeRecipes() {
@@ -25,7 +23,6 @@ export class DataStorageService {
   }
 
   getRecipes(): Observable<Recipe[]> {
-
     return this.httpClient.get<Recipe[]>(this.url)
         .pipe(
             map((recipes: Recipe[]) => {
