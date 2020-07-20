@@ -14,6 +14,10 @@ import {AuthInterceptorService} from './auth/auth-interceptor.service';
 import {AuthModule} from './auth/auth.module';
 import * as fromApp from './store/app.reducer';
 import {AuthEffects} from './auth/store/auth.effects';
+import {StoreDevtoolsModule} from '@ngrx/store-devtools';
+import {StoreRouterConnectingModule} from '@ngrx/router-store';
+import {environment} from '../environments/environment.prod';
+import {RecipesEffects} from './recipes/store/recipes.effects';
 
 @NgModule({
   declarations: [
@@ -24,7 +28,9 @@ import {AuthEffects} from './auth/store/auth.effects';
     BrowserModule,
     AppRoutingModule,
     StoreModule.forRoot(fromApp.appReducer),
-    EffectsModule.forRoot([AuthEffects]),
+    StoreDevtoolsModule.instrument({logOnly: environment.production}),
+    StoreRouterConnectingModule.forRoot(),
+    EffectsModule.forRoot([AuthEffects, RecipesEffects]),
     SharedModule,
     RecipesModule,
     AuthModule,
