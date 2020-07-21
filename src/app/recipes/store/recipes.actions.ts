@@ -7,6 +7,7 @@ export const ADD_RECIPE = '[Recipes] Add recipe';
 export const UPDATE_RECIPE = '[Recipes] Update recipe';
 export const DELETE_RECIPE = '[Recipes] Delete recipe';
 export const STORE_RECIPES = '[Recipes] Store recipes';
+export const HTTP_REQUEST_FAILURE = '[Recipes] Http request failure';
 
 export class SetRecipes implements Action {
   readonly type = SET_RECIPES;
@@ -44,4 +45,18 @@ export class StoreRecipes implements Action {
   readonly type = STORE_RECIPES;
 }
 
-export type RecipesActions = SetRecipes | FetchRecipes | AddRecipe | UpdateRecipe | DeleteRecipe | StoreRecipes;
+export class HttpRequestFailure implements Action {
+  readonly type = HTTP_REQUEST_FAILURE;
+
+  constructor(public payload: string) {
+  }
+}
+
+export type RecipesActions =
+    | SetRecipes
+    | FetchRecipes
+    | AddRecipe
+    | UpdateRecipe
+    | DeleteRecipe
+    | StoreRecipes
+    | HttpRequestFailure;

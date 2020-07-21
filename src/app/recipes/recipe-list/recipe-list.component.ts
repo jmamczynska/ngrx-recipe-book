@@ -4,7 +4,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import * as fromApp from '../../store/app.reducer';
-import {map} from 'rxjs/operators';
+import * as fromRecipes from '../store/recipes.reducer';
 
 @Component({
   selector: 'app-recipe-list',
@@ -14,6 +14,8 @@ import {map} from 'rxjs/operators';
 export class RecipeListComponent implements OnInit, OnDestroy {
   recipes: Recipe[];
   subscription: Subscription;
+  isLoading = false;
+  error: string = null;
 
   constructor(
       private router: Router,
@@ -23,9 +25,10 @@ export class RecipeListComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.store.select('recipes')
-        .pipe(map(recipesState => recipesState.recipes))
-        .subscribe((recipes: Recipe[]) => {
-          this.recipes = recipes;
+        .subscribe((recipesState: fromRecipes.State) => {
+          this.recipes = recipesState.recipes;
+          this.isLoading = recipesState.httpCall;
+          this.error = recipesState.message;
         }
     );
   }
