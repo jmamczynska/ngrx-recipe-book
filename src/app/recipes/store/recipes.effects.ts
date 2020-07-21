@@ -1,11 +1,12 @@
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import * as RecipesActions from './recipes.actions';
-import {map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {Recipe} from '../recipe.model';
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import * as fromApp from '../../store/app.reducer';
 import {Store} from '@ngrx/store';
+import {of} from 'rxjs';
 
 @Injectable()
 export class RecipesEffects {
@@ -16,15 +17,21 @@ export class RecipesEffects {
   fetchRecipe = this.actions$.pipe(
       ofType(RecipesActions.FETCH_RECIPES),
       switchMap(() => {
-        return this.httpClient.get<Recipe[]>(this.url);
-      }),
-      map((recipes: Recipe[]) => {
-        return recipes.map(recipe => {
-          return {...recipe, ingredients: recipe.ingredients ? recipe.ingredients : []};
-        });
-      }),
-      map((recipes: Recipe[]) => {
-        return new RecipesActions.SetRecipes(recipes);
+        return this.httpClient.get<Recipe[]>(this.url)
+            .pipe(
+                map((recipes: Recipe[]) => {
+                  return recipes.map(recipe => {
+                    return {...recipe, ingredients: recipe.ingredients ? recipe.ingredients : []};
+                  });
+                }),
+                map((recipes: Recipe[]) => {
+                  return new RecipesActions.SetRecipes(recipes);
+                }),
+                catchError(errorResponse => {
+                  const message: string = errorResponse.error.error;
+                  return of(new RecipesActions.HttpRequestFailure(message));
+                })
+            );
       })
   );
 
